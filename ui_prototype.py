@@ -634,8 +634,17 @@ class MainWindow(QMainWindow):
     def _start_api_query(self):
         """Start the API query process on a background thread."""
         self._api_query_done = False
+
+        # Disconnect old worker signals to avoid stale connections
+        if hasattr(self, '_api_worker') and self._api_worker is not None:
+            try:
+                self._api_worker.progress.disconnect()
+                self._api_worker.finished.disconnect()
+            except TypeError:
+                pass  # Already disconnected
+
         # Reset UI
-        self.api_status_label.setText("正在查询玩家数据...")
+        self.api_status_label.setText("正在查询玩家数据 (gametools)...")
         self.api_progress_label.setText(f"0 / {len(self.players_data)}")
         self.api_progress_bar.setValue(0)
         self.api_stat_found.setText("✅ 查到: 0")
@@ -658,6 +667,12 @@ class MainWindow(QMainWindow):
 
     def _on_api_progress(self, completed, total, stats):
         """Update progress UI during API query."""
+        phase = stats.get("phase", "")
+        if phase == "joarchy_id":
+            self.api_status_label.setText("正在查询修正数据 (joarchy)...")
+        elif phase == "joarchy_fb":
+            self.api_status_label.setText("正在兜底查询 (joarchy)...")
+
         self.api_progress_label.setText(f"{completed} / {total}")
         pct = int(completed / total * 100) if total > 0 else 0
         self.api_progress_bar.setValue(pct)
@@ -691,9 +706,15 @@ class MainWindow(QMainWindow):
                 p["kd"] = api["kd"]
                 p["kpm_adjusted"] = api["kpm"]
             else:
-                # API not found: apply dynamic offset
-                p["kd"] = round(p["kd_raw"] * offset_kd, 2) if p["kd_raw"] is not None else None
-                p["kpm_adjusted"] = round(p["kpm_raw"] * offset_kpm, 2) if p["kpm_raw"] is not None else None
+                # API not found
+                if offset_kd is not None:
+                    # Apply dynamic offset
+                    p["kd"] = round(p["kd_raw"] * offset_kd, 2) if p["kd_raw"] is not None else None
+                    p["kpm_adjusted"] = round(p["kpm_raw"] * offset_kpm, 2) if p["kpm_raw"] is not None else None
+                else:
+                    # Offset frozen (high coverage): use Excel raw values
+                    p["kd"] = p["kd_raw"]
+                    p["kpm_adjusted"] = p["kpm_raw"]
 
         # Rebuild Player objects with updated data
         self.players = load_players({"players": self.players_data})

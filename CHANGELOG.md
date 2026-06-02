@@ -1,5 +1,27 @@
 # 版本更新说明
 
+## v2.1.0 - 2026-06-02
+
+### 新增
+
+- **双源 API 查询**：引入 joarchy.com（BF6 Tracker API）作为第二数据源，与 gametools.network 互补
+- **KPM 修正**：优先使用 joarchy 的 KPM（去除了菜单/挂机时间，更接近真实战斗效率）
+- **joarchy 兜底查询**：gametools 查不到的玩家，自动用 joarchy 按 name 查询补充
+- **偏移系数冻结**：API 覆盖率 ≥ 80% 时自动冻结偏移系数，未查到的玩家直接使用 Excel 原始数据，避免小样本偏移不准
+
+### 变更
+
+- **偏移系数计算**：仅基于 gametools 数据计算，不再混入 joarchy 的 KPM 值（joarchy KPM 口径不同，混入会导致偏移虚高）
+- **查询进度显示**：区分 gametools / joarchy / joarchy兜底 三个阶段的状态文字
+- **第二次查询**：断开旧 worker 信号连接，避免重复查询时 UI 不刷新
+
+### 优化
+
+- joarchy 查询自带主备节点容错（UK 主节点 → US 备用节点）
+- userId 字段从 gametools 返回值中提取，作为 joarchy 的稳定 identifier 查询
+
+---
+
 ## v2.0.0 - 2026-06-01
 
 ### 新增
