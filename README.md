@@ -1,12 +1,15 @@
 # BF6 Team Balancer
 
+[English](README_EN.md) | 中文
+
 战地风云6服务器内战分队工具。根据玩家的KD和KPM数据，自动均衡分配阵营和小队，也支持纯随机分配。
 
 ## 功能
 
 - 从Excel文件导入玩家数据（昵称、KD、KPM、EAID）
-- **API 自动查询**：通过 EAID 自动获取玩家真实 KD/KPM，无需手动填入准确数据
+- **API 自动查询**：通过 EAID 自动获取玩家真实 KD/KPM，无需手动填入准确数据（双源查询：gametools.network + joarchy.com）
 - **动态偏移修正**：根据查到的玩家数据自动计算偏移系数，查不到的玩家用 Excel 数据自动修正
+- **偏移系数冻结**：API 覆盖率 ≥ 80% 时自动冻结偏移系数，避免小样本偏移不准
 - **两种分配模式：均衡（按实力）/ 随机（纯随机）**
 - 支持两种游戏模式：征服（侧重KD）/ 突破（侧重KPM）
 - 自定义小队绑定（两人绑定到同一阵营）
@@ -54,7 +57,7 @@ python ui_prototype.py
 bf6-team-balancer/
 ├── ui_prototype.py      # GUI main (PyQt5)
 ├── extract.py           # Excel parser (4-column format)
-├── api_query.py         # API query module (gametools.network)
+├── api_query.py         # API query module (gametools.network + joarchy.com)
 ├── history.py           # History & config storage
 ├── test_algorithm.py    # Algorithm tests (pytest)
 ├── test_api.py          # API availability test
@@ -64,8 +67,10 @@ bf6-team-balancer/
 ├── requirements.txt     # Runtime dependencies
 ├── requirements-dev.txt # Dev dependencies (pyinstaller, pytest)
 ├── CHANGELOG.md         # Version changelog
-├── README.md            # This file
-└── TECH_DOC.md          # Technical documentation
+├── README.md            # This file (Chinese)
+├── README_EN.md         # English documentation
+├── TECH_DOC.md          # Technical documentation
+└── .gitignore           # Git ignore rules
 ```
 
 ## 技术栈

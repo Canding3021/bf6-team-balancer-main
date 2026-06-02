@@ -1,12 +1,15 @@
 # BF6 Team Balancer
 
+English | [中文](README.md)
+
 A team balancing tool for Battlefield 6 in-house matches. Automatically balances teams and squads based on player KD and KPM data, with an option for pure random allocation.
 
 ## Features
 
 - Import player data from Excel files (Nickname, KD, KPM, EAID)
-- **API Auto Query**: Automatically fetch real KD/KPM via EAID — no need to manually enter accurate stats
+- **API Auto Query**: Automatically fetch real KD/KPM via EAID — no need to manually enter accurate stats (dual sources: gametools.network + joarchy.com)
 - **Dynamic Offset Correction**: Auto-calculate offset coefficient from queried data; players without API data use Excel data with correction
+- **Offset Coefficient Freeze**: Auto-freeze offset when API coverage ≥ 80%, avoiding inaccurate offset from small samples
 - **Two Allocation Modes**: Balanced (by skill) / Random (pure random)
 - Two game modes: Conquest (KD-focused) / Rush (KPM-focused)
 - Custom squad binding (lock two players to the same team)
@@ -54,7 +57,7 @@ SanSan      0.20    0.10    SanSanBF6
 bf6-team-balancer/
 ├── ui_prototype.py      # GUI main (PyQt5)
 ├── extract.py           # Excel parser (4-column format)
-├── api_query.py         # API query module (gametools.network)
+├── api_query.py         # API query module (gametools.network + joarchy.com)
 ├── history.py           # History & config storage
 ├── test_algorithm.py    # Algorithm tests (pytest)
 ├── test_api.py          # API availability test
@@ -66,7 +69,8 @@ bf6-team-balancer/
 ├── CHANGELOG.md         # Version changelog
 ├── README.md            # Chinese documentation
 ├── README_EN.md         # This file
-└── TECH_DOC.md          # Technical documentation
+├── TECH_DOC.md          # Technical documentation
+└── .gitignore           # Git ignore rules
 ```
 
 ## Tech Stack
