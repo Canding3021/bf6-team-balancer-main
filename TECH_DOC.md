@@ -2,21 +2,24 @@
 
 ## 1. 系统架构
 
+代码分为两层：`bf6balancer/core/`（纯逻辑，无 UI 依赖）与 `bf6balancer/ui/`（PyQt5 界面）。`main.py` 为入口。
+
 ```
-┌─────────────┐     ┌──────────────┐     ┌───────────────┐
-│  Excel文件   │────▶│  extract.py  │────▶│  ui_prototype  │
-│ (昵称/KD/KPM)│     │  解析+偏移    │     │  用户交互      │
-└─────────────┘     └──────────────┘     └───────┬───────┘
-                                                  │
-                                                  ▼
-┌─────────────┐     ┌──────────────┐     ┌───────────────┐
-│  分队结果    │◀────│ algorithm.py │◀────│  history.py    │
-│  均衡报告    │     │ 均衡/随机分配 │     │  历史记录存储   │
-└─────────────┘     └──────────────┘     └───────────────┘
+┌─────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  Excel文件   │────▶│ core/extract.py  │────▶│   ui/ (PyQt5)     │
+│ (昵称/KD/KPM)│     │  解析             │     │  main_window +    │
+└─────────────┘     └──────────────────┘     │  pages/ 各页面     │
+                                              └────────┬─────────┘
+                                                       │
+                                                       ▼
+┌─────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  分队结果    │◀────│ core/algorithm.py│◀────│  core/history.py  │
+│  均衡报告    │     │  均衡/随机分配    │     │  历史记录存储      │
+└─────────────┘     └──────────────────┘     └──────────────────┘
 
                         API 查询（双源）
                   ┌──────────────────────┐
-                  │     api_query.py     │
+                  │  core/api_query.py   │
                   │                      │
                   │  Step 1: gametools   │──▶ KD + userId
                   │  Step 2: joarchy     │──▶ 修正 KPM（by identifier）
@@ -31,7 +34,8 @@
 ```
 
 注: UI 直接将 extract_players() 的结果传给 load_players()，不经过 JSON 文件。
-extract.py 的 CLI 模式可独立运行，输出 players.json。
+core/extract.py 的 CLI 模式可独立运行，输出 players.json。
+MainWindow 由各页面 Mixin（ui/pages/）组合而成，每个 Mixin 负责一页的构建与交互。
 
 ## 2. 数据模型
 
@@ -217,14 +221,18 @@ Team.add_player(player):
 
 ## 5. 打包
 
-使用PyInstaller `--onedir`模式：
+使用 PyInstaller `--onedir` 模式。推荐直接用仓库内的 spec 文件（入口 `main.py`，依赖随 `bf6balancer` 包自动解析）：
+
+```bash
+pyinstaller --noconfirm BF6TeamBalancer.spec
+```
+
+或手动指定：
 
 ```bash
 pyinstaller --noconfirm --onedir --noconsole \
     --name 'BF6TeamBalancer' \
-    --add-data 'core;core' \
-    --add-data 'extract.py;.' \
-    ui_prototype.py
+    main.py
 ```
 
 输出在`dist/BF6TeamBalancer/`目录，双击exe即可运行。
@@ -238,6 +246,20 @@ pyinstaller --noconfirm --onedir --noconsole \
 | 自定义小队约束冲突 | UI层检测，提示"玩家已被绑定"或"不能绑定同一人" |
 | 候补满8人 | 停止抽取，多余的人留在主力队伍 |
 | 玩家数超过模式上限 | 征服最多64人(16队)，突破最多48人(12队) |
+
+## 6.1 崩溃日志
+
+打包为 windowed 应用（`console=False`）后，未捕获异常会让窗口直接消失、无任何提示。`crash_log.py` 提供三层防护：
+
+| 层 | 机制 | 捕获范围 | 输出 |
+|---|---|---|---|
+| 1 | `sys.excepthook` | 主线程 + Qt 槽函数里的 Python 异常 | `crash.log` + 弹窗 |
+| 2 | `faulthandler` | Qt C++ 层硬崩溃（段错误等 Python 抓不到的） | `fault.log` |
+| 3 | `log_exception()` | 后台线程（QThread）手动调用 | `crash.log` |
+
+- 日志目录：`%USERPROFILE%\Documents\BF6TeamBalancer\logs\`
+- `ApiQueryWorker` 的 `run()` 用 try/except 兜底，线程内异常通过 `failed` 信号通知 UI，避免转圈动画永久卡死（假死）
+- 日志写盘失败时静默处理，保证崩溃处理流程本身不会二次崩溃
 
 ## 7. 已知限制
 

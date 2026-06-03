@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['ui_prototype.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('core', 'core'), ('extract.py', '.'), ('history.py', '.'), ('api_query.py', '.')],
-    hiddenimports=[],
+    datas=[],
+    hiddenimports=['faulthandler'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

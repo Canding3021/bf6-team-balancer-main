@@ -29,7 +29,7 @@ A team balancing tool for Battlefield 6 in-house matches. Automatically balances
 
 ```bash
 pip install PyQt5 openpyxl requests
-python ui_prototype.py
+python main.py
 ```
 
 ## Excel Format
@@ -55,22 +55,29 @@ SanSan      0.20    0.10    SanSanBF6
 
 ```
 bf6-team-balancer/
-├── ui_prototype.py      # GUI main (PyQt5)
-├── extract.py           # Excel parser (4-column format)
-├── api_query.py         # API query module (gametools.network + joarchy.com)
-├── history.py           # History & config storage
-├── test_algorithm.py    # Algorithm tests (pytest)
-├── test_api.py          # API availability test
-├── core/
-│   ├── __init__.py
-│   └── algorithm.py     # Core allocation algorithm
-├── requirements.txt     # Runtime dependencies
-├── requirements-dev.txt # Dev dependencies (pyinstaller, pytest)
-├── CHANGELOG.md         # Version changelog
-├── README.md            # Chinese documentation
-├── README_EN.md         # This file
-├── TECH_DOC.md          # Technical documentation
-└── .gitignore           # Git ignore rules
+├── main.py                  # Entry point
+├── bf6balancer/             # Main package
+│   ├── core/                # Logic layer (no UI deps)
+│   │   ├── algorithm.py     # Core allocation algorithm
+│   │   ├── extract.py       # Excel parser (4-column format)
+│   │   ├── api_query.py     # Dual-source API query + offset
+│   │   ├── history.py       # History & config storage
+│   │   └── crash_log.py     # Crash logging (excepthook + faulthandler)
+│   └── ui/                  # UI layer (PyQt5)
+│       ├── theme.py         # Color themes & stylesheet
+│       ├── widgets.py       # Custom widgets (ModeCard/Spinner/Worker)
+│       ├── constants.py     # Font / name maps / page nav constants
+│       ├── main_window.py   # Main window (composes page mixins)
+│       └── pages/           # Page mixins (import/query/alloc/result/history…)
+├── tests/                   # pytest unit tests (algorithm/API logic/crash log)
+├── tools/check_api.py       # API availability script (hits real network, not a unit test)
+├── BF6TeamBalancer.spec     # PyInstaller build config
+├── requirements.txt         # Runtime dependencies
+├── requirements-dev.txt     # Dev dependencies (pyinstaller, pytest)
+├── CHANGELOG.md             # Version changelog
+├── README.md / README_EN.md # Chinese / English docs
+├── TECH_DOC.md              # Technical documentation
+└── .gitignore
 ```
 
 ## Tech Stack

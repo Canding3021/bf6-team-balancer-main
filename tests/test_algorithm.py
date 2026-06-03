@@ -4,7 +4,7 @@ Run: python -m pytest test_algorithm.py -v
 """
 
 import pytest
-from core.algorithm import (
+from bf6balancer.core.algorithm import (
     Player, Squad, Team,
     load_players, allocate_teams, random_allocate,
     build_custom_squads, extract_reserves, compute_balance_report,
@@ -28,7 +28,7 @@ def make_players(n, base_kd=1.0, base_kpm=1.0):
 
 
 SAMPLE_JSON = {
-    "meta": {"total_players": 6, "kpm_offset": 1.313},
+    "meta": {"total_players": 6},
     "players": [
         {"name": "Alice", "kd": 3.5, "kpm_adjusted": 2.0},
         {"name": "Bob", "kd": 1.2, "kpm_adjusted": 1.5},

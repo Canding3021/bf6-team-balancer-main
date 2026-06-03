@@ -29,7 +29,7 @@
 
 ```bash
 pip install PyQt5 openpyxl requests
-python ui_prototype.py
+python main.py
 ```
 
 ## Excel格式要求
@@ -55,22 +55,29 @@ python ui_prototype.py
 
 ```
 bf6-team-balancer/
-├── ui_prototype.py      # GUI main (PyQt5)
-├── extract.py           # Excel parser (4-column format)
-├── api_query.py         # API query module (gametools.network + joarchy.com)
-├── history.py           # History & config storage
-├── test_algorithm.py    # Algorithm tests (pytest)
-├── test_api.py          # API availability test
-├── core/
-│   ├── __init__.py
-│   └── algorithm.py     # Core allocation algorithm
-├── requirements.txt     # Runtime dependencies
-├── requirements-dev.txt # Dev dependencies (pyinstaller, pytest)
-├── CHANGELOG.md         # Version changelog
-├── README.md            # This file (Chinese)
-├── README_EN.md         # English documentation
-├── TECH_DOC.md          # Technical documentation
-└── .gitignore           # Git ignore rules
+├── main.py                  # 程序入口
+├── bf6balancer/             # 主包
+│   ├── core/                # 纯逻辑层（无 UI 依赖）
+│   │   ├── algorithm.py     # 分队核心算法
+│   │   ├── extract.py       # Excel 解析（4 列格式）
+│   │   ├── api_query.py     # 双源 API 查询 + 偏移
+│   │   ├── history.py       # 历史 & 配置存储
+│   │   └── crash_log.py     # 崩溃日志（excepthook + faulthandler）
+│   └── ui/                  # 界面层（PyQt5）
+│       ├── theme.py         # 颜色主题与样式表
+│       ├── widgets.py       # 自定义控件（ModeCard/Spinner/Worker）
+│       ├── constants.py     # 字体/名称映射/页面导航常量
+│       ├── main_window.py   # 主窗口（组合各页面 Mixin）
+│       └── pages/           # 各页面 Mixin（导入/查询/分配/结果/历史…）
+├── tests/                   # pytest 单测（算法/API逻辑/崩溃日志）
+├── tools/check_api.py       # API 可用性脚本（打真实网络，非单测）
+├── BF6TeamBalancer.spec     # PyInstaller 打包配置
+├── requirements.txt         # 运行依赖
+├── requirements-dev.txt     # 开发依赖（pyinstaller, pytest）
+├── CHANGELOG.md             # 版本更新说明
+├── README.md / README_EN.md # 中 / 英文档
+├── TECH_DOC.md              # 技术文档
+└── .gitignore
 ```
 
 ## 技术栈

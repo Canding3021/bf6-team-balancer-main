@@ -11,9 +11,10 @@ import sys
 import io
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Windows 控制台 UTF-8 输出
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+# Windows 控制台 UTF-8 输出（仅作为脚本直接运行时重定向，避免破坏 pytest 的输出捕获）
+if __name__ == "__main__":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 GAMETOOLS_BASE = "https://api.gametools.network/bf6/stats/"
 JOARCHY_BASE = "https://api-btr-joo-uk.joarchy.com"

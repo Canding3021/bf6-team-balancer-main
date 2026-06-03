@@ -1,5 +1,32 @@
 # 版本更新说明
 
+## v2.2.0 - 2026-06-03
+
+### 新增
+
+- **崩溃日志**：windowed 模式（`console=False`）下程序闪退不再无迹可寻。三层防护：
+  - `sys.excepthook` 全局钩子捕获主线程（含 Qt 槽函数）未捕获异常，写入 `crash.log` 并弹窗提示用户日志位置
+  - `faulthandler` 捕获 Qt C++ 层硬崩溃（段错误等 Python 抓不到的），dump 到 `fault.log`
+  - 日志位于 `%USERPROFILE%\Documents\BF6TeamBalancer\logs\`，与 history/config 同目录
+- **API 查询失败处理**：查询线程内异常不再让转圈动画永久卡死。新增 `failed` 信号，失败时停止 spinner、记录日志、显示"重试查询"按钮
+
+### 重构
+
+- **项目结构**：从扁平文件布局重构为正式的 `bf6balancer/` Python 包，含 `core/` 和 `ui/` 两个子包
+  - 入口从 `ui_prototype.py`（1662行）改为轻量 `main.py`（59行）
+  - GUI 拆分为 7 个页面 Mixin（`bf6balancer/ui/pages/`）+ 独立的 theme / widgets / constants 模块
+- **导航状态机**：页码硬编码（魔法数字 0–7）改为 `PAGE_*` 命名常量 + `_MAIN_FLOW` 线性流程列表，跳过逻辑收敛到 `_is_skipped()`；增删页面只需改顶部定义
+- **偏移应用逻辑**：从 UI 回调 `_on_api_finished` 抽出为 `api_query.apply_results_to_players()` 纯函数，可脱离网络/UI 单测
+- **样式去重**：步骤指示器圆点样式抽为 `_dot_style()` 辅助方法
+
+### 测试
+
+- 新增 `test_api_logic.py`（11 项）：偏移计算与应用逻辑，不打网络
+- 新增 `test_crash_log.py`（6 项）：崩溃日志写入、excepthook、回调容错
+- `test_api.py` 的 `sys.stdout` 重定向改为仅脚本运行时生效，修复其破坏 pytest 输出捕获、导致整个测试套件无法运行的问题
+
+---
+
 ## v2.1.0 - 2026-06-02
 
 ### 新增

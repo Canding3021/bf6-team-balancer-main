@@ -325,6 +325,38 @@ def query_all(
     }
 
 
+def apply_results_to_players(players_data: list[dict], result: dict) -> None:
+    """
+    将 query_all() 的结果写回玩家数据（原地修改 players_data）。
+
+    对每个玩家更新 kd / kpm_adjusted 字段，规则:
+    - API 查到了: 直接用真实值
+    - 没查到且偏移系数有效: 用 Excel 原始值 × 动态偏移
+    - 没查到且偏移系数冻结 (offset 为 None): 直接用 Excel 原始值
+
+    这是 _on_api_finished 里原本内联的业务逻辑，抽出来便于脱离 UI 单测。
+    """
+    offset_kd = result.get("offset_kd")
+    offset_kpm = result.get("offset_kpm")
+    api_results = result.get("api_results", {})
+
+    for p in players_data:
+        eaid = p.get("eaid", "")
+        api = api_results.get(eaid)
+        if api is not None:
+            # API 查到了: 用真实值
+            p["kd"] = api["kd"]
+            p["kpm_adjusted"] = api["kpm"]
+        elif offset_kd is not None:
+            # 未查到，偏移系数有效: Excel 原始值 × 偏移
+            p["kd"] = round(p["kd_raw"] * offset_kd, 2) if p["kd_raw"] is not None else None
+            p["kpm_adjusted"] = round(p["kpm_raw"] * offset_kpm, 2) if p["kpm_raw"] is not None else None
+        else:
+            # 未查到，偏移冻结: 用 Excel 原始值
+            p["kd"] = p["kd_raw"]
+            p["kpm_adjusted"] = p["kpm_raw"]
+
+
 def _compute_offsets(
     players_data: list[dict],
     api_results: dict[str, Optional[dict]],
