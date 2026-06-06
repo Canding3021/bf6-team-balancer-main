@@ -219,8 +219,8 @@ class ResultPageMixin:
         rows = []
         for sq in team_data["squads"]:
             for p in sq["members"]:
-                kd = p["kd"]
-                kpm = p["kpm"]
+                kd = p["kd"] if p["kd"] is not None else 0.0
+                kpm = p["kpm"] if p["kpm"] is not None else 0.0
                 score = round(kd * cfg["kd_weight"] + kpm * cfg["kpm_weight"], 2)
                 rows.append((sq["squad_id"], p["name"], str(kd), str(kpm), str(score)))
 
