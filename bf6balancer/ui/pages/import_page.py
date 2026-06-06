@@ -1,5 +1,6 @@
 """BF6 Team Balancer - Import page: file picker, theme selector, player table."""
 
+import os
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog,
     QTableWidget, QTableWidgetItem, QStackedWidget, QComboBox, QHeaderView,
